@@ -15,15 +15,24 @@ if __name__ == '__main__':
     cli = Cli.Cli()
     cli.paser()
     
-    cliOptions = "xen-create-image"
-    subnetmask = "255.255.255.0"
     broadcast = None
     gateway = None
+    macaddress = None
+    cliOptions = "xen-create-image"
+    subnetmask = "255.255.255.0"
     nameserver = "85.31.184.7 8.8.8.8"
     lvm = "VolGroup"
+    
     ipfreefile = "ipfree.txt"
     ipdropfile = "ipdrop.txt"
-    macaddress = None
+    
+    if not os.path.isfile(ipfreefile):
+        print "ipfree.txt not found!\n"
+        exit(-1)
+        
+    if not os.path.isfile(ipdropfile):
+        print "ipdrop.txt not found!\n"
+        exit(-1)
     
     if cli.get_hostname() != None:
         cliOptions += " --hostname %s" % (cli.get_hostname())
@@ -69,42 +78,19 @@ if __name__ == '__main__':
     if cli.get_ip() != None:
         cliOptions += " --ip %s" % (cli.get_ip())
     else:
-        if not os.path.isfile(ipfreefile):
-            print "ipfree.txt not found!\n"
-            exit(-1)
-        
-        if not os.path.isfile(ipdropfile):
-            print "ipdrop.txt not found!\n"
-            exit(-1)
         
         rIpFree = open(ipfreefile, 'r')
         
         if os.stat(ipfreefile).st_size == 0:
             print "No ip`s found, maybe ip are emty?!\n"
             exit(-1)
-        lines = rIpFree.readlines()
+        
+        lines = rIpFree.readline()
         rIpFree.close()
-        listip = []
-        listmac = []
-        for ad in lines:
-            (ip, mac) = ad.split(";")
-            listip.append(ip)
-            listmac.append(mac)
-            
-        cliOptions += " --ip %s" % (listip[0])
-        ipaddress = listip[0]
-        macaddress = listmac[0]
-        
-        del lines[0]
-        wIpFree = open(ipfreefile, 'w')
-        wIpFree.writelines(lines)
-        wIpFree.close()
-        
-        ipDropEntry = "%s;%s" % (ipaddress, macaddress)
-        with open(ipdropfile, "a") as aIpDrop:
-            aIpDrop.write(ipDropEntry)
-        
-        ipTmp = ipaddress.split(".")
+        (ip, mac) = lines.split(";")
+        cliOptions += " --ip %s" % (ip)
+        macaddress = mac[:-1]
+        ipTmp = ip.split(".")
         gateway = "%s.%s.%s.1" % (ipTmp[0],ipTmp[1],ipTmp[2])
         broadcast = "%s.%s.%s.255" % (ipTmp[0],ipTmp[1],ipTmp[2])
     
@@ -131,14 +117,27 @@ if __name__ == '__main__':
     if cli.get_mac() != None:
         cliOptions += " --mac %s" % (cli.get_mac())
     else:
-        cliOptions += " --mac %s" % (mac)
+        cliOptions += " --mac %s" % (macaddress)
         
     cliOptions += " --broadcast %s" % (broadcast)
-
+    
+    print cliOptions
+    
     p = subprocess.Popen(cliOptions, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
     while(True):
         retcode = p.poll() #returns None while subprocess is running
         line = p.stdout.readline()
-        print line
+        print line[:-1]
         if(retcode is not None):
             break
+    
+    if p.poll() == 1:
+        rIpFree = open(ipfreefile, 'r')
+        lines = rIpFree.readlines()
+        rIpFree.close()
+        with open(ipdropfile, "a") as aIpDrop:
+            aIpDrop.write(lines[0])
+        del lines[0]
+        wIpFree = open(ipfreefile, 'w')
+        wIpFree.writelines(lines)
+        wIpFree.close()
