@@ -15,7 +15,8 @@ if __name__ == '__main__':
     cli = Cli.Cli()
     cli.paser()
     
-    if os.path.isfile("/etc/xen/%s.conf" % (cli.get_hostname())):
+    vmconf = "/etc/xen/%s.conf" % (cli.get_hostname())
+    if os.path.isfile(vmconf):
         print "Config /etc/xen/%s.conf exist!" % (cli.get_hostname())
         exit(-1)
     
@@ -125,15 +126,15 @@ if __name__ == '__main__':
         
     cliOptions += " --broadcast %s" % (broadcast)
     
-    p = subprocess.Popen(cliOptions, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+    p = subprocess.Popen("ls", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
     while(True):
         retcode = p.poll() #returns None while subprocess is running
         line = p.stdout.readline()
         print line[:-1]
         if(retcode is not None):
             break
-    
-    if os.path.isfile("/etc/xen/%s.conf" % (cli.get_hostname())):
+    vmconf = "/etc/xen/%s.conf" % (cli.get_hostname())
+    if os.path.isfile(vmconf):
         rIpFree = open(ipfreefile, 'r')
         lines = rIpFree.readlines()
         rIpFree.close()
