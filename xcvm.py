@@ -19,7 +19,7 @@ if __name__ == '__main__':
     subnetmask = "255.255.255.0"
     broadcast = None
     gateway = None
-    nameserver = "85.31.185.126 85.31.184.6 85.31.184.7 8.8.8.8"
+    nameserver = "85.31.184.7 8.8.8.8"
     lvm = "VolGroup"
     ipfreefile = "ipfree.txt"
     ipdropfile = "ipdrop.txt"
