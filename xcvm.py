@@ -15,6 +15,10 @@ if __name__ == '__main__':
     cli = Cli.Cli()
     cli.paser()
     
+    if os.path.isfile("/etc/xen/%s.conf" % (cli.get_hostname())):
+        print "Config /etc/xen/%s.conf exist!" % (cli.get_hostname())
+        exit(-1)
+    
     broadcast = None
     gateway = None
     macaddress = None
@@ -129,7 +133,7 @@ if __name__ == '__main__':
         if(retcode is not None):
             break
     
-    if p.returncode == 0:
+    if os.path.isfile("/etc/xen/%s.conf" % (cli.get_hostname())):
         rIpFree = open(ipfreefile, 'r')
         lines = rIpFree.readlines()
         rIpFree.close()
