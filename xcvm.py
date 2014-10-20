@@ -121,8 +121,6 @@ if __name__ == '__main__':
         
     cliOptions += " --broadcast %s" % (broadcast)
     
-    print cliOptions
-    
     p = subprocess.Popen(cliOptions, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
     while(True):
         retcode = p.poll() #returns None while subprocess is running
@@ -131,7 +129,7 @@ if __name__ == '__main__':
         if(retcode is not None):
             break
     
-    if p.poll() == 1:
+    if p.returncode == 0:
         rIpFree = open(ipfreefile, 'r')
         lines = rIpFree.readlines()
         rIpFree.close()
