@@ -17,7 +17,7 @@ if __name__ == '__main__':
     
     vmconf = "/etc/xen/%s.conf" % (cli.get_hostname())
     if os.path.isfile(vmconf):
-        print "Config /etc/xen/%s.conf exist!" % (cli.get_hostname())
+        print "Config " + vmconf + " exist!"
         exit(-1)
     
     broadcast = None
