@@ -6,8 +6,18 @@ Created on 19.10.2014
 @author: jakob
 '''
 
-import Cli, os
+import Cli, os, re
 import subprocess
+
+def clearNewline(clearFile):
+    with open(clearFile,'r+') as ipFile:
+        tmp = ipFile.readlines()
+        ipFile.seek(0)
+        ipFile.truncate()
+        ipFile.seek(0)
+        for l in tmp:
+            if not re.match(r'^\s*$', l):
+                ipFile.write(l)
 
 if __name__ == '__main__':
     print ""
@@ -34,10 +44,14 @@ if __name__ == '__main__':
     if not os.path.isfile(ipfreefile):
         print "ipfree.txt not found!\n"
         exit(-1)
+    else:
+        clearNewline(ipfreefile)
         
     if not os.path.isfile(ipdropfile):
         print "ipdrop.txt not found!\n"
         exit(-1)
+    else:
+        clearNewline(ipdropfile)
     
     if cli.get_hostname() != None:
         cliOptions += " --hostname %s" % (cli.get_hostname())
@@ -126,7 +140,7 @@ if __name__ == '__main__':
         
     cliOptions += " --broadcast %s" % (broadcast)
     
-    p = subprocess.Popen("ls", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+    p = subprocess.Popen(cliOptions, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
     while(True):
         retcode = p.poll() #returns None while subprocess is running
         line = p.stdout.readline()
@@ -144,3 +158,5 @@ if __name__ == '__main__':
         wIpFree = open(ipfreefile, 'w')
         wIpFree.writelines(lines)
         wIpFree.close()
+        clearNewline(ipfreefile)
+        clearNewline(ipdropfile)
