@@ -38,8 +38,9 @@ if __name__ == '__main__':
     nameserver = "85.31.184.7 8.8.8.8"
     lvm = "VolGroup"
     
-    ipfreefile = expanduser("/home/ipfree.txt")
-    ipdropfile = expanduser("~/ipdrop.txt")
+    homeDir = os.environ['HOME']
+    ipfreefile = homeDir + "/ipfree.txt"
+    ipdropfile = homeDir + "/ipdrop.txt"
     
     if not os.path.isfile(ipfreefile):
         print "ipfree.txt not found!\n"
