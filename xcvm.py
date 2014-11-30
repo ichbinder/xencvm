@@ -5,7 +5,7 @@ Created on 19.10.2014
 
 @author: jakob
 '''
-
+from os.path import expanduser
 import Cli, os, re
 import subprocess
 
@@ -38,8 +38,8 @@ if __name__ == '__main__':
     nameserver = "85.31.184.7 8.8.8.8"
     lvm = "VolGroup"
     
-    ipfreefile = os.path.join("~/ipfree.txt")
-    ipdropfile = os.path.join("~/ipdrop.txt")
+    ipfreefile = expanduser("/home/ipfree.txt")
+    ipdropfile = expanduser("~/ipdrop.txt")
     
     if not os.path.isfile(ipfreefile):
         print "ipfree.txt not found!\n"
