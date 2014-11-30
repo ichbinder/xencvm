@@ -5,7 +5,6 @@ Created on 19.10.2014
 
 @author: jakob
 '''
-from os.path import expanduser
 import Cli, os, re
 import subprocess
 
@@ -38,9 +37,8 @@ if __name__ == '__main__':
     nameserver = "85.31.184.7 8.8.8.8"
     lvm = "VolGroup"
     
-    homeDir = os.environ['HOME']
-    ipfreefile = homeDir + "/ipfree.txt"
-    ipdropfile = homeDir + "/ipdrop.txt"
+    ipfreefile = "/etc/ipfree.txt"
+    ipdropfile = "/etc/ipdrop.txt"
     
     if not os.path.isfile(ipfreefile):
         print "ipfree.txt not found!\n"
