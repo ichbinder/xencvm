@@ -148,7 +148,6 @@ if __name__ == '__main__':
             break
     vmconf = "/etc/xen/%s.cfg" % (cli.get_hostname())
     if os.path.isfile(vmconf):
-        print "conf ist da"
         rIpFree = open(ipfreefile, 'r')
         lines = rIpFree.readlines()
         rIpFree.close()
