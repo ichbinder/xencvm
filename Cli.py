@@ -11,6 +11,7 @@ import os
 from optparse import OptionParser 
 from zope.interface import implements
 from IVMOptions import IVMOptions
+import re
 
 class Cli(object):
     implements(IVMOptions)
@@ -97,12 +98,43 @@ class Cli(object):
                                 metavar="AA:BB:CC:DD:EE:FF")
         self.__parser.add_option("--force", 
                                  dest="force", 
+                                 action="store_true",
                                  help="""Force overwriting existing images. This will remove
                                         existing images or LVM volumes which match those which
-                                        are liable to be used by the new invocation.""")   
+                                        are liable to be used by the new invocation.""",
+                                 default=False)   
         self.__parser.add_option("--verbose", 
                                  dest="verbose", 
-                                 help="""Show useful debugging information.""")           
+                                 action="store_true",
+                                 help="""Show useful debugging information.""",
+                                 default=False)   
+        self.__parser.add_option("--mirror", 
+                                 dest="mirror", 
+                                 help="""Setup the mirror to use when installing via
+                                        debootstrap. (Default value: mirror used in
+                                        /etc/apt/sources.list or for Debian
+                                        "http://http.debian.net/debian/" and for Ubuntu
+                                        "http://archive.ubuntu.com/ubuntu/")""", 
+                                metavar="url")
+        self.__parser.add_option("--install-source", 
+                                 dest="installsourc", 
+                                 help="""Specify the source path to use when installing via
+                                        a copy or tarball installation.""", 
+                                metavar="/path/to/tarball")
+        self.__parser.add_option("--install-method", 
+                                 dest="installmethod", 
+                                 help="""Specify the installation method to use. Valid methods
+                                        are:
+                    
+                                        * debootstrap
+                                        * cdebootstrap
+                                        * rinse
+                                        * rpmstrap (deprecated)
+                                        * tar (needs --install-source=tarball.tar)
+                                        * copy (needs --install-source=/path/to/copy/from)
+                    
+                                        (Default value for Debian and Ubuntu: debootstrap)""", 
+                                metavar="method")
     def paser(self):
         (opts, args) = self.__parser.parse_args()
         self.__opts = opts
@@ -161,3 +193,12 @@ class Cli(object):
 
     def get_verbose(self):
         return self.__opts.verbose
+    
+    def get_mirror(self):
+        return self.__opts.mirror
+    
+    def get_installsourc(self):
+        return self.__opts.installsourc
+    
+    def get_installmethod(self):
+        return self.__opts.installmethod

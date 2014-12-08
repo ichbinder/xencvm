@@ -137,11 +137,20 @@ if __name__ == '__main__':
     else:
         cliOptions += " --mac %s" % (macaddress)
         
-    if cli.get_force() == False:
+    if cli.get_force() == True:
         cliOptions += " --force"
         
-    if cli.get_verbose() == False:
+    if cli.get_verbose() == True:
         cliOptions += " --verbose"
+        
+    if cli.get_mirror() != None:
+        cliOptions += " --mirror %s" % (cli.get_mirror())
+        
+    if cli.get_installsourc() != None:
+        cliOptions += " --install-source %s" % (cli.get_installsourc())
+        
+    if cli.get_installmethod() != None:
+        cliOptions += " --install-method %s" % (cli.get_installmethod())
 
     cliOptions += " --broadcast %s" % (broadcast)
 
