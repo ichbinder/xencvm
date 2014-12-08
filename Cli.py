@@ -95,7 +95,14 @@ class Cli(object):
                                         flags, but the specific MAC address will only be used
                                         for the first interface.)""", 
                                 metavar="AA:BB:CC:DD:EE:FF")
-        
+        self.__parser.add_option("--force", 
+                                 dest="force", 
+                                 help="""Force overwriting existing images. This will remove
+                                        existing images or LVM volumes which match those which
+                                        are liable to be used by the new invocation.""")   
+        self.__parser.add_option("--verbose", 
+                                 dest="verbose", 
+                                 help="""Show useful debugging information.""")           
     def paser(self):
         (opts, args) = self.__parser.parse_args()
         self.__opts = opts
@@ -148,5 +155,9 @@ class Cli(object):
         
     def get_mac(self):
         return self.__opts.mac
-
     
+    def get_force(self):
+        return self.__opts.force
+
+    def get_verbose(self):
+        return self.__opts.verbose

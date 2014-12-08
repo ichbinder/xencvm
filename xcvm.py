@@ -136,6 +136,12 @@ if __name__ == '__main__':
         cliOptions += " --mac %s" % (cli.get_mac())
     else:
         cliOptions += " --mac %s" % (macaddress)
+        
+    if cli.get_force() == False:
+        cliOptions += " --force"
+        
+    if cli.get_verbose() == False:
+        cliOptions += " --verbose"
 
     cliOptions += " --broadcast %s" % (broadcast)
 
