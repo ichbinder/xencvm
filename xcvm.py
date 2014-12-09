@@ -156,7 +156,7 @@ if __name__ == '__main__':
         if not os.path.exists("/usr/lib/xen-tools/hookscripts"):
             print "Hook Script-Folder dont exist."
             exit(-1)
-        if not os.path.exists("/usr/lib/xen-tools/hookscripts/" + cli.get_hookscript() + ".cfg"):
+        if not os.path.exists("/usr/lib/xen-tools/hookscripts/" + cli.get_hookscript()):
             print "Hook Script dont exist."
             exit(-1)
         cliHookScript = "cp /usr/lib/xen-tools/hookscripts/%s.cfg /usr/lib/xen-tools/debian.d/97-%s.cfg" % (cli.get_hookscript())
