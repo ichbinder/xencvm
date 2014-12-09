@@ -153,10 +153,10 @@ if __name__ == '__main__':
         cliOptions += " --install-method %s" % (cli.get_installmethod())
         
     if cli.get_hookscript() != None:
-        if os.path.isfile("/usr/lib/xen-tools/hookscripts"):
+        if not os.path.exists("/usr/lib/xen-tools/hookscripts"):
             print "Hook Script-Folder dont exist."
             exit(-1)
-        if os.path.isfile("/usr/lib/xen-tools/hookscripts/" + cli.get_hookscript()+ ".cfg"):
+        if not os.path.exists("/usr/lib/xen-tools/hookscripts/" + cli.get_hookscript()+ ".cfg"):
             print "Hook Script dont exist."
             exit(-1)
         cliHookScript = "cp /usr/lib/xen-tools/hookscripts/%s.cfg /usr/lib/xen-tools/debian.d/" % (cli.get_hookscript())
