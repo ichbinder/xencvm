@@ -135,6 +135,10 @@ class Cli(object):
                     
                                         (Default value for Debian and Ubuntu: debootstrap)""", 
                                 metavar="method")
+        self.__parser.add_option("--hook-script", 
+                                 dest="hookscript", 
+                                 help="""Hook Script will be load""", 
+                                metavar="script_name")
     def paser(self):
         (opts, args) = self.__parser.parse_args()
         self.__opts = opts
@@ -202,3 +206,6 @@ class Cli(object):
     
     def get_installmethod(self):
         return self.__opts.installmethod
+    
+    def get_hookscript(self):
+        return self.__opts.hookscript

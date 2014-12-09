@@ -151,6 +151,22 @@ if __name__ == '__main__':
         
     if cli.get_installmethod() != None:
         cliOptions += " --install-method %s" % (cli.get_installmethod())
+        
+    if cli.get_hookscript() != None:
+        if os.path.isfile("/usr/lib/xen-tools/hookscripts"):
+            print "Hook Script-Folder dont exist."
+            exit(-1)
+        if os.path.isfile("/usr/lib/xen-tools/hookscripts/" + cli.get_hookscript()+ ".cfg"):
+            print "Hook Script dont exist."
+            exit(-1)
+        cliHookScript = "cp /usr/lib/xen-tools/hookscripts/%s.cfg /usr/lib/xen-tools/debian.d/" % (cli.get_hookscript())
+        p = subprocess.Popen(cliHookScript, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+        while(True):
+            retcode = p.poll() #returns None while subprocess is running
+            line = p.stdout.readline()
+            print line[:-1]
+            if(retcode is not None):
+                break
 
     cliOptions += " --broadcast %s" % (broadcast)
 
@@ -175,4 +191,12 @@ if __name__ == '__main__':
         clearNewline(ipfreefile)
         clearNewline(ipdropfile)
         
-        #ksksjsjhdsjsksalk
+    if cli.get_hookscript() != None:
+        cliHookScript = "rm /usr/lib/xen-tools/debian.d/%s.cfg" % (cli.get_hookscript())
+        p = subprocess.Popen(cliHookScript, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+        while(True):
+            retcode = p.poll() #returns None while subprocess is running
+            line = p.stdout.readline()
+            print line[:-1]
+            if(retcode is not None):
+                break
