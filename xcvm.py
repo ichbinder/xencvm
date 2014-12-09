@@ -159,7 +159,7 @@ if __name__ == '__main__':
         if not os.path.exists("/usr/lib/xen-tools/hookscripts/" + cli.get_hookscript()):
             print "Hook Script dont exist."
             exit(-1)
-        cliHookScript = "cp /usr/lib/xen-tools/hookscripts/%s.cfg /usr/lib/xen-tools/debian.d/97-%s.cfg" % (cli.get_hookscript(), cli.get_hookscript())
+        cliHookScript = "cp /usr/lib/xen-tools/hookscripts/%s /usr/lib/xen-tools/debian.d/97-%s.cfg" % (cli.get_hookscript(), cli.get_hookscript())
         p = subprocess.Popen(cliHookScript, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
         while(True):
             retcode = p.poll() #returns None while subprocess is running
@@ -190,13 +190,13 @@ if __name__ == '__main__':
         wIpFree.close()
         clearNewline(ipfreefile)
         clearNewline(ipdropfile)
-        
-    if cli.get_hookscript() != None:
-        cliHookScript = "rm /usr/lib/xen-tools/debian.d/97-%s.cfg" % (cli.get_hookscript())
-        p = subprocess.Popen(cliHookScript, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-        while(True):
-            retcode = p.poll() #returns None while subprocess is running
-            line = p.stdout.readline()
-            print line[:-1]
-            if(retcode is not None):
-                break
+    if not os.path.exists("/usr/lib/xen-tools/hookscripts/" + cli.get_hookscript()):
+        if cli.get_hookscript() != None:
+            cliHookScript = "rm /usr/lib/xen-tools/debian.d/97-%s.cfg" % (cli.get_hookscript())
+            p = subprocess.Popen(cliHookScript, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+            while(True):
+                retcode = p.poll() #returns None while subprocess is running
+                line = p.stdout.readline()
+                print line[:-1]
+                if(retcode is not None):
+                    break
