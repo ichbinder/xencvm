@@ -194,7 +194,7 @@ if __name__ == '__main__':
     
     if cli.get_hookscript() != None:
         cliHookScript = "/usr/lib/xen-tools/debian.d/97-%s.cfg" % (cli.get_hookscript())
-        if not os.path.exists(cliHookScript):
+        if os.path.exists(cliHookScript):
             p = subprocess.Popen("rm " + cliHookScript, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
             while(True):
                 retcode = p.poll() #returns None while subprocess is running
