@@ -191,10 +191,11 @@ if __name__ == '__main__':
         clearNewline(ipfreefile)
         clearNewline(ipdropfile)
         
-    if not os.path.exists("/usr/lib/xen-tools/debian.d/97-" + cli.get_hookscript() + ".cfg"):
-        if cli.get_hookscript() != None:
-            cliHookScript = "rm /usr/lib/xen-tools/debian.d/97-%s.cfg" % (cli.get_hookscript())
-            p = subprocess.Popen(cliHookScript, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+    
+    if cli.get_hookscript() != None:
+        cliHookScript = "/usr/lib/xen-tools/debian.d/97-%s.cfg" % (cli.get_hookscript())
+        if not os.path.exists(cliHookScript):
+            p = subprocess.Popen("rm " + cliHookScript, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
             while(True):
                 retcode = p.poll() #returns None while subprocess is running
                 line = p.stdout.readline()
