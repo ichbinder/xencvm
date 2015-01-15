@@ -117,16 +117,22 @@ if __name__ == '__main__':
 
     if cli.get_nameserver() != None:
         cliOptions += " --nameserver %s" % (cli.get_nameserver())
+    elif cli.get_dhcp == True:
+        pass
     else:
         cliOptions += " --nameserver %s" % (nameserver)
 
     if cli.get_gateway() != None:
         cliOptions += " --gateway %s" % (cli.get_gateway())
+    elif cli.get_dhcp == True:
+        pass
     else:
         cliOptions += " --gateway %s" % (gateway)
 
     if cli.get_netmask() != None:
         cliOptions += " --netmask %s" % (cli.get_netmask())
+    elif cli.get_dhcp == True:
+        pass
     else:
         cliOptions += " --netmask %s" % (subnetmask)
 
