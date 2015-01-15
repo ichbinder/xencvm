@@ -40,6 +40,8 @@ if __name__ == '__main__':
     ipfreefile = "/etc/ipfree.txt"
     ipdropfile = "/etc/ipdrop.txt"
     
+    print cli.get_dhcp
+    
     if cli.get_dhcp == False:
         if not os.path.isfile(ipfreefile):
             print "ipfree.txt not found!\n"
