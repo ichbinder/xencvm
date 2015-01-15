@@ -95,6 +95,8 @@ if __name__ == '__main__':
 
     if cli.get_ip() != None:
         cliOptions += " --ip %s" % (cli.get_ip())
+    elif cli.get_dhcp == True:
+        cliOptions += " --dhcp"
     else:
 
         rIpFree = open(ipfreefile, 'r')
@@ -111,6 +113,7 @@ if __name__ == '__main__':
         ipTmp = ip.split(".")
         gateway = "%s.%s.%s.1" % (ipTmp[0],ipTmp[1],ipTmp[2])
         broadcast = "%s.%s.%s.255" % (ipTmp[0],ipTmp[1],ipTmp[2])
+        cliOptions += " --broadcast %s" % (broadcast)
 
     if cli.get_nameserver() != None:
         cliOptions += " --nameserver %s" % (cli.get_nameserver())
@@ -167,8 +170,7 @@ if __name__ == '__main__':
             print line[:-1]
             if(retcode is not None):
                 break
-
-    cliOptions += " --broadcast %s" % (broadcast)
+    
 
     p = subprocess.Popen(cliOptions, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
     while(True):

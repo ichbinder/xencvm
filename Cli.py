@@ -139,6 +139,12 @@ class Cli(object):
                                  dest="hookscript", 
                                  help="""Hook Script will be load""", 
                                 metavar="script_name")
+        self.__parser.add_option("--dhcp", 
+                                 dest="dhcp", 
+                                 action="store_true",
+                                 help="""The guest will be configured to fetch its networking
+                                        details via DHCP.""",
+                                 default=False)
     def paser(self):
         (opts, args) = self.__parser.parse_args()
         self.__opts = opts
@@ -209,3 +215,6 @@ class Cli(object):
     
     def get_hookscript(self):
         return self.__opts.hookscript
+    
+    def get_dhcp(self):
+        return self.__opts.dhcp
