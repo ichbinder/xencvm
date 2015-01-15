@@ -146,6 +146,8 @@ if __name__ == '__main__':
 
     if cli.get_mac() != None:
         cliOptions += " --mac %s" % (cli.get_mac())
+    elif cli.get_dhcp() == True:
+        pass
     else:
         cliOptions += " --mac %s" % (macaddress)
         
