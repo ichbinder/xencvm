@@ -40,17 +40,18 @@ if __name__ == '__main__':
     ipfreefile = "/etc/ipfree.txt"
     ipdropfile = "/etc/ipdrop.txt"
     
-    if not os.path.isfile(ipfreefile):
-        print "ipfree.txt not found!\n"
-        exit(-1)
-    else:
-        clearNewline(ipfreefile)
-        
-    if not os.path.isfile(ipdropfile):
-        print "ipdrop.txt not found!\n"
-        exit(-1)
-    else:
-        clearNewline(ipdropfile)
+    if cli.get_dhcp == False:
+        if not os.path.isfile(ipfreefile):
+            print "ipfree.txt not found!\n"
+            exit(-1)
+        else:
+            clearNewline(ipfreefile)
+            
+        if not os.path.isfile(ipdropfile):
+            print "ipdrop.txt not found!\n"
+            exit(-1)
+        else:
+            clearNewline(ipdropfile)
     
     if cli.get_hostname() != None:
         cliOptions += " --hostname %s" % (cli.get_hostname())
@@ -185,20 +186,21 @@ if __name__ == '__main__':
         print line[:-1]
         if(retcode is not None):
             break
-    vmconf = "/etc/xen/%s.cfg" % (cli.get_hostname())
-    if os.path.isfile(vmconf):
-        rIpFree = open(ipfreefile, 'r')
-        lines = rIpFree.readlines()
-        rIpFree.close()
-        with open(ipdropfile, "a") as aIpDrop:
-            aIpDrop.write(lines[0])
-        del lines[0]
-        wIpFree = open(ipfreefile, 'w')
-        wIpFree.writelines(lines)
-        wIpFree.close()
-        clearNewline(ipfreefile)
-        clearNewline(ipdropfile)
         
+    if cli.get_dhcp == False:
+        vmconf = "/etc/xen/%s.cfg" % (cli.get_hostname())
+        if os.path.isfile(vmconf):
+            rIpFree = open(ipfreefile, 'r')
+            lines = rIpFree.readlines()
+            rIpFree.close()
+            with open(ipdropfile, "a") as aIpDrop:
+                aIpDrop.write(lines[0])
+            del lines[0]
+            wIpFree = open(ipfreefile, 'w')
+            wIpFree.writelines(lines)
+            wIpFree.close()
+            clearNewline(ipfreefile)
+            clearNewline(ipdropfile)        
     
     if cli.get_hookscript() != None:
         cliHookScript = "/usr/lib/xen-tools/debian.d/97-%s.cfg" % (cli.get_hookscript())
