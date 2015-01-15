@@ -40,9 +40,9 @@ if __name__ == '__main__':
     ipfreefile = "/etc/ipfree.txt"
     ipdropfile = "/etc/ipdrop.txt"
     
-    print cli.get_dhcp
+    print cli.get_dhcp()
     
-    if cli.get_dhcp == False:
+    if cli.get_dhcp() == False:
         if not os.path.isfile(ipfreefile):
             print "ipfree.txt not found!\n"
             exit(-1)
@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
     if cli.get_ip() != None:
         cliOptions += " --ip %s" % (cli.get_ip())
-    elif cli.get_dhcp == True:
+    elif cli.get_dhcp() == True:
         cliOptions += " --dhcp"
     else:
 
@@ -120,21 +120,21 @@ if __name__ == '__main__':
 
     if cli.get_nameserver() != None:
         cliOptions += " --nameserver %s" % (cli.get_nameserver())
-    elif cli.get_dhcp == True:
+    elif cli.get_dhcp() == True:
         pass
     else:
         cliOptions += " --nameserver %s" % (nameserver)
 
     if cli.get_gateway() != None:
         cliOptions += " --gateway %s" % (cli.get_gateway())
-    elif cli.get_dhcp == True:
+    elif cli.get_dhcp() == True:
         pass
     else:
         cliOptions += " --gateway %s" % (gateway)
 
     if cli.get_netmask() != None:
         cliOptions += " --netmask %s" % (cli.get_netmask())
-    elif cli.get_dhcp == True:
+    elif cli.get_dhcp() == True:
         pass
     else:
         cliOptions += " --netmask %s" % (subnetmask)
@@ -189,7 +189,7 @@ if __name__ == '__main__':
         if(retcode is not None):
             break
         
-    if cli.get_dhcp == False:
+    if cli.get_dhcp() == False:
         vmconf = "/etc/xen/%s.cfg" % (cli.get_hostname())
         if os.path.isfile(vmconf):
             rIpFree = open(ipfreefile, 'r')
