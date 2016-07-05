@@ -35,7 +35,7 @@ if __name__ == '__main__':
     cliOptions = "xen-create-image"
     subnetmask = "255.255.255.0"
     nameserver = "85.31.184.7 8.8.8.8"
-    lvm = "VolGroup"
+    lvm = "vg01"
     
     ipfreefile = "/etc/ipfree.txt"
     ipdropfile = "/etc/ipdrop.txt"
@@ -84,7 +84,7 @@ if __name__ == '__main__':
     if cli.get_dist() != None:
         cliOptions += " --dist %s" % (cli.get_dist())
     else:
-        cliOptions += " --dist wheezy"
+        cliOptions += " --dist jessie"
 
     if cli.get_fs() != None:
         cliOptions += " --fs %s" % (cli.get_fs())
@@ -167,13 +167,13 @@ if __name__ == '__main__':
         cliOptions += " --install-method %s" % (cli.get_installmethod())
         
     if cli.get_hookscript() != None:
-        if not os.path.exists("/usr/lib/xen-tools/hookscripts"):
+        if not os.path.exists("/etc/xen-tools/hookscripts"):
             print "Hook Script-Folder dont exist."
             exit(-1)
-        if not os.path.exists("/usr/lib/xen-tools/hookscripts/" + cli.get_hookscript()):
+        if not os.path.exists("/etc/xen-tools/hookscripts/" + cli.get_hookscript()):
             print "Hook Script dont exist."
             exit(-1)
-        cliHookScript = "cp /usr/lib/xen-tools/hookscripts/%s /usr/lib/xen-tools/debian.d/97-%s.cfg" % (cli.get_hookscript(), cli.get_hookscript())
+        cliHookScript = "cp /etc/xen-tools/hookscripts/%s /usr/share/xen-tools/debian.d/97-%s.cfg" % (cli.get_hookscript(), cli.get_hookscript())
         p = subprocess.Popen(cliHookScript, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
         while(True):
             retcode = p.poll() #returns None while subprocess is running
@@ -207,7 +207,7 @@ if __name__ == '__main__':
             clearNewline(ipdropfile)        
     
     if cli.get_hookscript() != None:
-        cliHookScript = "/usr/lib/xen-tools/debian.d/97-%s.cfg" % (cli.get_hookscript())
+        cliHookScript = "/usr/share/xen-tools/debian.d/97-%s.cfg" % (cli.get_hookscript())
         if os.path.exists(cliHookScript):
             p = subprocess.Popen("rm " + cliHookScript, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
             while(True):
