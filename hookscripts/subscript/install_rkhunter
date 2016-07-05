@@ -1,0 +1,68 @@
+#!/bin/bash
+
+cd /tmp/rkhunter
+./installer.sh --layout /usr --install
+
+cat <<\EOF > /etc/cron.daily/rkhunter
+#!/bin/sh
+ 
+RKHUNTER=/usr/bin/rkhunter
+ 
+test -x $RKHUNTER || exit 0
+ 
+# source our config
+. /etc/default/rkhunter
+ 
+if [ -z "$NICE" ]; then
+    NICE=0
+fi
+ 
+$RKHUNTER --versioncheck
+$RKHUNTER --update
+ 
+case "$CRON_DAILY_RUN" in
+     [Yy]*)
+        OUTFILE=`mktemp` || exit 1
+        /usr/bin/nice -n $NICE $RKHUNTER --cronjob --report-warnings-only --appendlog > $OUTFILE
+        if [ -s "$OUTFILE" ]; then
+          (
+            echo "Subject: [rkhunter] $(hostname -f) - Daily report"
+            echo "To: $REPORT_EMAIL"
+            echo ""
+            cat $OUTFILE
+          ) | /usr/sbin/sendmail $REPORT_EMAIL
+        fi
+        rm -f $OUTFILE
+        ;;
+      *)
+       exit 0
+       ;;
+esac
+
+EOF
+
+chmod +x /etc/cron.daily/rkhunter
+
+cat << EOF > /etc/default/rkhunter
+# Defaults for rkhunter cron jobs
+# sourced by /etc/cron.*/rkhunter
+ 
+#
+# This is a POSIX shell fragment
+#
+ 
+# Set this to the email address where reports and run output should be sent
+REPORT_EMAIL="root"
+ 
+# Set this to yes to enable rkhunter weekly database updates
+CRON_DB_UPDATE="yes"
+ 
+# Set this to yes to enable reports of weekly database updates
+DB_UPDATE_EMAIL="no"
+ 
+# Set this to yes to enable rkhunter daily runs
+CRON_DAILY_RUN="yes"
+ 
+# Nicenesses range from -20 (most favorable scheduling) to 19 (least favorable).
+NICE="0"
+EOF
