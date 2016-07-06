@@ -1,0 +1,247 @@
+#!/bin/sh
+
+prefix=$1
+
+#
+#  Source our common functions
+#
+if [ -e /usr/share/xen-tools/common.sh ]; then
+    . /usr/share/xen-tools/common.sh
+else
+    . ./hooks/common.sh
+fi
+
+#
+# Log our start
+#
+logMessage Script $0 starting
+
+
+#
+#  Install packages
+#
+installDebianPackage ${prefix} postfix
+installDebianPackage ${prefix} sudo
+installDebianPackage ${prefix} unhide
+installDebianPackage ${prefix} mailutils
+installDebianPackage ${prefix} finger
+installDebianPackage ${prefix} bash-completion
+installDebianPackage ${prefix} ntp
+installDebianPackage ${prefix} aptitude
+installDebianPackage ${prefix} libsasl2-modules
+
+#
+# save sshd
+#
+# root no ssh login/etc/ssh/sshd_config
+#
+if [ -f ${prefix}/etc/ssh/sshd_config ]; then
+    if sed -i 's/PermitRootLogin yes/PermitRootLogin no/' ${prefix}/etc/ssh/sshd_config; then
+        logMessage "\n- successfully disabled root login\n"
+    else
+        logMessage "\n- failed to disable root login\n"
+    fi
+
+    if sed -i 's/RSAAuthentication yes/RSAAuthentication no/' ${prefix}/etc/ssh/sshd_config; then
+        logMessage "\n- successfully disabled RSAAuthentification\n"
+    else
+        logMessage "\n- failed to disable RSAAuthentification\n"
+    fi
+
+    if sed -i 's/#AuthorizedKeysFile/AuthorizedKeysFile/' ${prefix}/etc/ssh/sshd_config; then
+        logMessage "\n- successfully enable AuthorizedKeysFile\n"
+    else
+        logMessage "\n- failed to enable AuthorizedKeysFile\n"
+    fi
+
+    if sed -i 's/ChallengeResponseAuthentication yes/ChallengeResponseAuthentication no/' ${prefix}/etc/ssh/sshd_config; then
+        logMessage "\n- successfully disabled ChallengeResponseAuthentication\n"
+    else
+        logMessage "\n- failed to disable ChallengeResponseAuthentication\n"
+    fi
+
+    if sed -i 's/#IgnoreUserKnownHosts/IgnoreUserKnownHosts/' ${prefix}/etc/ssh/sshd_config; then
+        logMessage "\n- successfully enable IgnoreUserKnowHosts\n"
+    else
+        logMessage "\n- failed to enable IgnoreUserKnowHosts\n"
+    fi
+
+    if sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' ${prefix}/etc/ssh/sshd_config; then
+        logMessage "\n- successfully disabled PasswordAuthentification\n"
+    else
+        logMessage "\n- failed to disable PasswordAuthentification\n"
+    fi
+
+    if sed -i 's/Port 22/Port 2223/' ${prefix}/etc/ssh/sshd_config; then
+        logMessage "\n- successfully set ssh Port\n"
+    else
+        logMessage "\n- failed set ssh Port\n"
+    fi
+
+	if chroot ${prefix} /usr/sbin/addgroup --system sshusers; then
+    	logMessage "\n- successfully added group sshusers\n"
+	else
+    	logMessage "\n- failed to add group sshusers\n"
+	fi
+
+    if echo "AllowGroups sshusers" >> ${prefix}/etc/ssh/sshd_config; then
+        logMessage "\n- successfully added group sshusers to ssh conf\n"
+    else
+        logMessage "\n- failed to add group sshusers to ssh conf\n"
+    fi
+fi
+
+
+
+#
+# add user jakob
+#
+pj=$(openssl rand 1000 | strings | grep -io [[:alnum:]] | head -n 16 | tr -d '\n')
+if chroot ${prefix} /usr/sbin/useradd -d /home/jakob -m -s /bin/bash -G sudo -p $(openssl passwd -1 "$pj") jakob; then
+    logMessage "\n- successfully added jakob\n"
+else
+    logMessage "\n- failed to add jakob\n"
+fi
+
+if chroot ${prefix} /usr/sbin/usermod -a -G sudo jakob; then
+    logMessage "\n- successfully added jakob to group sudo\n"
+else
+    logMessage "\n- failed to add jakob to group sudo\n"
+fi
+
+if mkdir ${prefix}/home/jakob/.ssh; then
+    logMessage "\n- successfully added .ssh dir to jakob\n"
+else
+    logMessage "\n- failed to add .ssh dir to jakob\n"
+fi
+
+if cp /home/jakob/create_vm/authorized_keys ${prefix}/home/jakob/.ssh/; then
+    logMessage "\n- successfully added ssh pub key to jakob\n"
+else
+    logMessage "\n- failed to add ssh pub key to jakob\n"
+fi
+
+if chmod 755 ${prefix}/home/jakob/.ssh/authorized_keys; then
+    logMessage "\n- successfully chmod authorized_keys\n"
+else
+    logMessage "\n- failed to chmod authorized_keys\n"
+fi
+
+if chroot ${prefix} /bin/chown jakob:jakob /home/jakob/.ssh/; then
+    logMessage "\n- successfully chown jakob to authorized_keys\n"
+else
+    logMessage "\n- failed to chown jakob to authorized_keys\n"
+fi
+
+if chroot ${prefix} /bin/chown jakob:jakob /home/jakob/.ssh/authorized_keys; then
+    logMessage "\n- successfully chown jakob to authorized_keys\n"
+else
+    logMessage "\n- failed to chown jakob to authorized_keys\n"
+fi
+
+if chroot ${prefix} /usr/sbin/usermod -a -G sshusers jakob; then
+    logMessage "\n- successfully added jakob to group sshusers\n"
+else
+	logMessage "\n- failed to add jakob to group sshusers\n"
+fi
+
+
+#
+# add Firewall dir
+#
+if mkdir ${prefix}/etc/fw; then
+    logMessage "\n- successfully add Firewall dir\n"
+else
+    logMessage "\n- failed to add Firewall dir\n"
+fi
+
+if chown jakob:root ${prefix}/etc/fw; then
+    logMessage "\n- successfully chown Firewall dir\n"
+else
+    logMessage "\n- failed to chown Firewall dir\n"
+fi
+
+if chmod 775 ${prefix}/etc/fw; then
+    logMessage "\n- successfully chmod Firewall dir\n"
+else
+    logMessage "\n- failed to chmod Firewall dir\n"
+fi
+
+#
+# postfix
+#
+cp /etc/postfix/main.cf ${prefix}/etc/postfix/main.cf
+cp /etc/postfix/sasl_password ${prefix}/etc/postfix/sasl_password
+cp /etc/postfix/sasl_password.db  ${prefix}/etc/postfix/sasl_password.db
+
+if sed -i "s|matrix.opentoken.de|${hostname}.opentoken.de|g" ${prefix}/etc/postfix/main.cf; then
+    logMessage "\n- successfully domain postfix\n"
+else
+    logMessage "\n- failed to domain postfix\n"
+fi
+
+
+#
+# Backup
+#
+
+#if [ -f /etc/xenbackup.conf ]; then
+#current_time=$(date "+%H:%M")
+#cat << EOF >> /etc/xenbackup.conf
+#
+#[${hostname}]
+#        period = daily
+#        time = $current_time
+#        starttime = '05-09-2014'
+#        backuptarget  = /mnt/backupftp/
+#        backuporigin = None
+#        weekdays = None
+#        pathtoxenconf = /etc/xen/${hostname}.cfg
+#EOF
+#
+#    logMessage "\n- successfully install backup\n"
+#else
+#    logMessage "\n- failed to install backup\n"
+#fi
+
+
+#
+# ssh Login Warning
+#
+
+#if [ -f ${prefix}/etc/profile ]; then
+cat << 'EOF' > ${prefix}/opt/shell-login.sh
+#!/bin/bash
+
+echo "Login auf $(hostname) am $(date +%Y-%m-%d) um $(date +%H:%M)"
+echo "Benutzer: $USER"
+echo
+finger
+EOF
+
+cat << EOF >> ${prefix}/etc/profile
+/opt/shell-login.sh | mailx -s "SSH Login auf ${hostname}" jakob.warnow@gmx.de
+EOF
+
+if chmod 755 ${prefix}/opt/shell-login.sh; then
+   	logMessage "\n- successfully chmod shell-login.sh\n"
+else
+   	logMessage "\n- failed to chmod shell-login.sh\n"
+fi
+#    logMessage "\n- successfully install shell-login monitorting\n"
+#else
+#    logMessage "\n- failed to install shell-login monitoring\n"
+#fi
+
+
+
+
+
+logMessage "\n\n\n\n\n\n####################################### \nUser jakob PW:  $pj"
+logMessage "####################################### \n\n\n\n\n\n"
+
+#
+# Log our finish
+#
+logMessage Script $0 finished
+

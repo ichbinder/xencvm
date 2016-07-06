@@ -1,0 +1,261 @@
+#!/bin/sh
+
+prefix=$1
+
+#
+#  Source our common functions
+#
+if [ -e /usr/lib/xen-tools/common.sh ]; then
+    . /usr/lib/xen-tools/common.sh
+else
+    . ./hooks/common.sh
+fi
+
+#
+# Log our start
+#
+logMessage Script $0 starting
+
+
+#
+#  Install packages
+#
+installDebianPackage ${prefix} postfix
+installDebianPackage ${prefix} sudo
+installDebianPackage ${prefix} nagios-plugins-basic
+installDebianPackage ${prefix} nagios-nrpe-server
+installDebianPackage ${prefix} libsys-statistics-linux-perl
+installDebianPackage ${prefix} make
+installDebianPackage ${prefix} binutils
+installDebianPackage ${prefix} libreadline5
+installDebianPackage ${prefix} libruby1.8
+installDebianPackage ${prefix} ruby
+installDebianPackage ${prefix} ruby1.8
+installDebianPackage ${prefix} unhide
+installDebianPackage ${prefix} mailutils
+
+
+#
+# add user jakob
+#
+pj=$(openssl rand 1000 | strings | grep -io [[:alnum:]] | head -n 16 | tr -d '\n')
+if chroot ${prefix} /usr/sbin/useradd -d /home/jakob -m -s /bin/bash -G sudo -p $(openssl passwd -1 "$pj") jakob; then
+    logMessage "successfully added jakob"
+else
+    logMessage "failed to add jakob"
+fi
+
+if chroot ${prefix} usermod -a -G sudo jakob; then
+    logMessage "successfully add jakob to sudo"
+else
+    logMessage "failed to add jakob to sudo"
+fi
+
+if mkdir ${prefix}/home/jakob/.ssh; then
+    logMessage "successfully add folder ssh"
+else
+    logMessage "failed to add folder ssh"
+fi
+
+cat << EOF > ${prefix}/home/jakob/.ssh/authorized_keys
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC1Gs9+Tx0VhRKecHFIjEvMjCsnz74Rx0pIMj1gYCI+AX8KGBKaQiUO84WKe91M3p5Xqrp0rv0VNGW29UffuIjIZk1x2Rud+X/cXeV/SEqprgZwus3V5fDmMxNgJreVQsInqxunaZsDZXWS5YXqN0Jv6gvFsranCQYSiScXodqlqYfAR3MT7W069d0+mQ7qpamNAKYoN09riw3nvQh41ErJ9sfX83vt4Gxp1Moit4BXyCxj9f12D3oMxip8YP+H8AV/N1oi5j5Vn4TdgDqQU0aiKf5trPRNL0JNMlT3HJ6/g7tS91Tk586oX8ugnqy9uSnFKszluRHFDHL+5j4UbwIr jakob.warnow@gmx.de
+EOF
+
+if chroot chown -R jakob:jakob ${prefix}/home/jakob/.ssh; then
+    logMessage "successfully chown jakob to folder ssh"
+else
+    logMessage "failed to chown jakob to folder ssh"
+fi
+
+
+#
+# save sshd
+#
+# root no ssh login
+#
+if [ -f ${prefix}/etc/ssh/sshd_config ]; then
+    if sed -i 's/PermitRootLogin yes/PermitRootLogin no/' ${prefix}/etc/ssh/sshd_config; then
+        logMessage "successfully disabled root login"
+    else
+        logMessage "failed to disable root login"
+    fi
+
+
+fi
+
+
+#
+# add Firewall dir
+#
+if mkdir ${prefix}/etc/fw; then
+    logMessage "\n- successfully add Firewall dir\n"
+else
+    logMessage "\n- failed to add Firewall dir\n"
+fi
+
+if chown root:jakob ${prefix}/etc/fw; then
+    logMessage "\n- successfully chown Firewall dir\n"
+else
+    logMessage "\n- failed to chown Firewall dir\n"
+fi
+
+if chmod 775 ${prefix}/etc/fw; then
+    logMessage "\n- successfully chmod Firewall dir\n"
+else
+    logMessage "\n- failed to chmod Firewall dir\n"
+fi
+
+
+
+#
+##########################################################################################################################
+# # start install Nagios client
+#
+cd ${prefix}/tmp
+if wget http://search.cpan.org/CPAN/authors/id/B/BL/BLOONIX/Sys-Statistics-Linux-0.66.tar.gz; then
+    logMessage "\n- successfully download Sys-Statistics-Linux\n"
+else
+    logMessage "\n- failed to download Sys-Statistics-Linux\n"
+fi
+
+if tar xvzf Sys-Statistics-Linux-0.66.tar.gz; then
+    logMessage "\n- successfully unzip Sys-Statistics-Linux\n"
+else
+    logMessage "\n- failed to unzip Sys-Statistics-Linux\n"
+fi
+
+cd ${prefix}/tmp/Sys-Statistics-Linux-0.66/
+if perl Makefile.PL; then
+    logMessage "\n- successfully create makefile for Sys-Statistics-Linux\n"
+else
+    logMessage "\n- failed to create makefile for Sys-Statistics-Linux\n"
+fi
+
+if chroot ${prefix} make -C /tmp/Sys-Statistics-Linux-0.66/; then
+    logMessage "\n- successfully compile Sys-Statistics-Linux\n"
+else
+    logMessage "\n- failed to compile Sys-Statistics-Linux\n"
+fi
+
+if chroot ${prefix} make -C /tmp/Sys-Statistics-Linux-0.66/ install; then
+    logMessage "\n- successfully install Sys-Statistics-Linux\n"
+else
+    logMessage "\n- failed to install Sys-Statistics-Linux\n"
+fi
+
+if wget --no-http-keep-alive "http://exchange.nagios.org/components/com_mtree/attachment.php?link_id=2516&cf_id=24" -O ${prefix}/usr/lib/nagios/plugins/check_linux_stats.pl; then
+    logMessage "\n- successfully install check_linux_stats\n"
+else
+    logMessage "\n- failed to install check_linux_stats\n"
+fi
+
+if chmod 755 ${prefix}/usr/lib/nagios/plugins/check_linux_stats.pl; then
+    logMessage "\n- successfully change rite 755 check_linux_stats\n"
+else
+    logMessage "\n- failed to change rite 755 check_linux_stats\n"
+fi
+
+if wget --http-user=nagios --http-passwd=Nagios_237K#0Mn http://monitor.opentoken.de/moni/nrpe.cfg -O ${prefix}/etc/nagios/nrpe.cfg; then
+    logMessage "\n- successfully install nrpe.cfg\n"
+else
+    logMessage "\n- failed to install nrpe.cfg\n"
+fi
+
+if chroot ${prefix} /etc/init.d/nagios-nrpe-server restart; then
+    logMessage "\n- successfully restart nagios-nrpe-server deamon\n"
+else
+    logMessage "\n- failed to restart nagios-nrpe-server deamon\n"
+fi
+#
+# # end of Nagios client install
+#####################################################################################################################################################
+#
+
+
+#
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+# install rkhunter
+#
+cd ${prefix}/tmp
+if wget --no-http-keep-alive http://sourceforge.net/projects/rkhunter/files/latest/download?source=typ_redirect -O ${prefix}/tmp/rkhunter.tar.gz; then
+    logMessage "\n- successfully download rkhunter\n"
+else
+    logMessage "\n- failed to download rkhunter\n"
+fi
+
+if mkdir ${prefix}/tmp/rkhunter; then
+    logMessage "\n- successfully mkdir /tmp/rkhunter\n"
+else
+    logMessage "\n- failed to mkdir /tmp/rkhunter\n"
+fi
+
+if tar xzf ${prefix}/tmp/rkhunter.tar.gz -C ${prefix}/tmp/rkhunter --strip-components=1; then
+    logMessage "\n- successfully untar rkhunter\n"
+else
+    logMessage "\n- failed to untar rkhunter\n"
+fi
+
+if sed -i 's|#!/bin/sh|#!/bin/bash|g' ${prefix}/tmp/rkhunter/installer.sh; then
+    logMessage "\n- successfully change script rkhunter\n"
+else
+    logMessage "\n- failed to change script rkhunter\n"
+fi
+
+if cp /usr/lib/xen-tools/hookscripts/subscript/install_rkhunter ${prefix}/tmp/install_rkhunter; then
+    logMessage "\n- successfully cp rkhunter\n"
+else
+    logMessage "\n- failed cp rkhunter\n"
+fi
+
+if chroot ${prefix} /tmp/install_rkhunter; then
+    logMessage "\n- successfully install rkhunter\n"
+else
+    logMessage "\n- failed to install rkhunter\n"
+fi
+
+if sed -i 's|#MAIL-ON-WARNING=me@mydomain   root@mydomain|MAIL-ON-WARNING=jakob.warnow@gmx.de|g' ${prefix}/etc/rkhunter.conf; then
+    logMessage "\n- successfully mail config rkhunter\n"
+else
+    logMessage "\n- failed to mail config rkhunter\n"
+fi
+
+if sed -i 's|#MAIL_CMD=mail|MAIL_CMD=mail|g' ${prefix}/etc/rkhunter.conf; then
+    logMessage "\n- successfully mail config tool rkhunter\n"
+else
+    logMessage "\n- failed to mail config tool rkhunter\n"
+fi
+
+if sed -i 's|REPORT_EMAIL="root"|REPORT_EMAIL="jakob.warnow@gmx.de"|g' ${prefix}/etc/default/rkhunter; then
+    logMessage "\n- successfully mail config2 rkhunter\n"
+else
+    logMessage "\n- failed to mail config2 rkhunter\n"
+fi
+#
+# install rkhunter finished
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+#
+
+
+#
+# postfix
+#
+cp /etc/postfix/main.cf ${prefix}/etc/postfix/main.cf
+cp /etc/postfix/sasl_password ${prefix}/etc/postfix/sasl_password
+cp /etc/postfix/sasl_password.db  ${prefix}/etc/postfix/sasl_password.db
+
+if sed -i "s|matrix.opentoken.de|${hostname}.opentoken.de|g" ${prefix}/etc/postfix/main.cf; then
+    logMessage "\n- successfully domain postfix\n"
+else
+    logMessage "\n- failed to domain postfix\n"
+fi
+
+#chroot ${prefix} echo "Ich bin der Nachrichtentext" | mail -s"Testmail" jakob.warnow@gmx.de
+
+logMessage "\n\n\n\n\n\n####################################### \nUser jakob PW:  $pj"
+logMessage "####################################### \n\n\n\n\n\n"
+
+#
+# Log our finish
+#
+logMessage Script $0 finished
+
